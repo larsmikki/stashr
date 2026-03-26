@@ -1,0 +1,18 @@
+services:
+  stashy:
+    image: stashy:latest
+    container_name: stashy
+    ports:
+      - "3010:3010"
+    volumes:
+      - stash_data:/app/data
+      - stash_cache:/app/cache
+      # Replace with the path to your media folder: :ro=Read-only
+      - /path/to/your/media:/media:ro
+    environment:
+      - PORT=3010
+    restart: unless-stopped
+
+volumes:
+  stash_data:
+  stash_cache:

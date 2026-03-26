@@ -1,0 +1,16 @@
+<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+  </defs>
+  <rect width="36" height="36" rx="8" fill="url(#bg)"/>
+  <!-- Photo frame with landscape -->
+  <rect x="7" y="9" width="22" height="18" rx="2" fill="none" stroke="white" stroke-width="2" opacity="0.95"/>
+  <!-- Mountain -->
+  <polygon points="10,24 17,15 24,24" fill="white" opacity="0.7"/>
+  <polygon points="18,24 23,17 29,24" fill="white" opacity="0.5"/>
+  <!-- Sun -->
+  <circle cx="24" cy="14" r="2.5" fill="white" opacity="0.85"/>
+</svg>
