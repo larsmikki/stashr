@@ -8,6 +8,7 @@ cache/transcoded/*
 !cache/thumbnails/.gitkeep
 !cache/transcoded/.gitkeep
 .env
+.env.*
 *.log
 *.tar
 *.bat
@@ -23,3 +24,7 @@ tasks/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Tool-specific
+.gstack/
+.code-review-graph/
