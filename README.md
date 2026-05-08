@@ -26,18 +26,12 @@ A self-hosted personal media gallery for browsing images and videos over LAN.
 
 ### Quick start
 
-**1. Pull or build the image**
-
-```bash
-docker build -t stashy .
-```
-
-**2. Edit `docker-compose.yml` to mount your media**
+**1. Edit `docker-compose.yml` to mount your media**
 
 ```yaml
 services:
   stashy:
-    image: stashy:latest
+    image: larsmikki/stashy:latest
     container_name: stashy
     ports:
       - "3010:3010"
@@ -77,7 +71,7 @@ Open **http://localhost:3010**, go to **Settings → Add album**, and pick a fol
 
 ```bash
 docker compose down
-docker build -t stashy .
+docker pull larsmikki/stashy:latest
 docker compose up -d
 ```
 
