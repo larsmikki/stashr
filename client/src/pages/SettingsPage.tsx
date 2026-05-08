@@ -1,25 +1,39 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAlbums } from '../hooks/useAlbums';
-import { useTheme, THEMES } from '../contexts/ThemeContext';
-import * as api from '../api/client';
-import { getErrorMessage } from '../utils/errors';
-import { SCAN_POLL_INTERVAL_MS } from '../constants';
-import AlbumForm from '../components/AlbumForm';
-import ScanButton from '../components/ScanButton';
-import ThumbnailButton from '../components/ThumbnailButton';
-import PasswordSettings from '../components/PasswordSettings';
-import type { Album } from '../types';
-import './settings.css';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAlbums } from '@/hooks/useAlbums';
+import ThemePicker from '@/components/ThemePicker';
+import * as api from '@/api/client';
+import type { AppSettings } from '@/api/client';
+import { getErrorMessage } from '@/utils/errors';
+import { SCAN_POLL_INTERVAL_MS } from '@/constants';
+import AlbumForm from '@/components/AlbumForm';
+import ScanButton from '@/components/ScanButton';
+import ThumbnailButton from '@/components/ThumbnailButton';
+import PasswordSettings from '@/components/PasswordSettings';
+import type { Album } from '@/types';
+import '@/pages/settings.css';
+
+// A row in the combined album+favorites list
+interface CombinedRow {
+  id: number;
+  name: string;
+  path: string;
+  sort_order: number;
+  file_count?: number;
+  scan_status?: string;
+  isFavorites: boolean;
+  albumData?: Album;
+}
 
 export default function SettingsPage() {
+  const { theme } = useTheme();
   const { albums, loading, refresh } = useAlbums();
-  const { theme, setThemeByName } = useTheme();
   const [showCreate, setShowCreate] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [scanningAll, setScanningAll] = useState(false);
   const [generatingAll, setGeneratingAll] = useState(false);
+  const [settings, setSettings] = useState<AppSettings | null>(null);
   const scanAllIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const thumbAllIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -28,11 +42,81 @@ export default function SettingsPage() {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   useEffect(() => {
+    api.getSettings().then(setSettings).catch(() => {});
     return () => {
       if (scanAllIntervalRef.current) clearInterval(scanAllIntervalRef.current);
       if (thumbAllIntervalRef.current) clearInterval(thumbAllIntervalRef.current);
     };
   }, []);
+
+  const handleExport = () => {
+    const data = { albums: albums.map(a => ({ name: a.name, path: a.path, sort_order: a.sort_order, scan_status: a.scan_status, last_scan_at: a.last_scan_at })) };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `stashy-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const data = JSON.parse(reader.result as string);
+        const imported = data.albums || [];
+        let created = 0;
+        for (const album of imported) {
+          if (album.name && album.path) {
+            const existing = albums.find(a => a.name === album.name || a.path === album.path);
+            if (!existing) {
+              await api.createAlbum(album.name, album.path);
+              created++;
+            }
+          }
+        }
+        await refresh();
+        alert(`Imported ${created} new album${created !== 1 ? 's' : ''} (${imported.length - created} skipped - already exist)`);
+      } catch {
+        alert('Invalid JSON file');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  // Build the combined list: albums + favorites entry, in sorted order
+  const buildCombinedList = (): CombinedRow[] => {
+    const albumRows: CombinedRow[] = albums.map(a => ({
+      id: a.id,
+      name: a.name,
+      path: a.path,
+      sort_order: a.sort_order,
+      file_count: a.file_count,
+      scan_status: a.scan_status,
+      isFavorites: false,
+      albumData: a,
+    }));
+
+    const favSortOrder = settings?.favorites_sort_order ?? 9999;
+    const favRow: CombinedRow = {
+      id: -1,
+      name: 'Favorites',
+      path: '',
+      sort_order: favSortOrder,
+      file_count: settings?.favorites_count,
+      isFavorites: true,
+    };
+
+    // Insert favorites at the correct position
+    const pos = Math.min(favSortOrder, albumRows.length);
+    const result = [...albumRows];
+    result.splice(pos, 0, favRow);
+    return result;
+  };
 
   const handleCreate = async (name: string, path: string) => {
     try {
@@ -65,6 +149,16 @@ export default function SettingsPage() {
       refresh();
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to delete album'));
+    }
+  };
+
+  const handleToggleFavoritesOnHome = async (enabled: boolean) => {
+    try {
+      setError(null);
+      await api.updateSettings({ favorites_on_home: enabled });
+      setSettings(s => s ? { ...s, favorites_on_home: enabled } : s);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to update settings'));
     }
   };
 
@@ -121,7 +215,8 @@ export default function SettingsPage() {
       return;
     }
 
-    const reordered = [...albums];
+    const combined = buildCombinedList();
+    const reordered = [...combined];
     const [moved] = reordered.splice(dragItem.current, 1);
     reordered.splice(dragOverItem.current, 0, moved);
 
@@ -131,10 +226,18 @@ export default function SettingsPage() {
 
     try {
       setError(null);
-      await api.reorderAlbums(reordered.map(a => a.id));
+      const albumsInOrder = reordered.filter(item => !item.isFavorites);
+      const favIdx = reordered.findIndex(item => item.isFavorites);
+
+      await api.reorderAlbums(albumsInOrder.map(a => a.id));
+      if (favIdx !== -1) {
+        await api.updateSettings({ favorites_sort_order: favIdx });
+        setSettings(s => s ? { ...s, favorites_sort_order: favIdx } : s);
+      }
+
       refresh();
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to reorder albums'));
+      setError(getErrorMessage(err, 'Failed to reorder'));
     }
   };
 
@@ -151,18 +254,27 @@ export default function SettingsPage() {
     }
   };
 
+  const combinedList = buildCombinedList();
+
+  const sectionStyle = {
+    background: theme.surface,
+    border: `1px solid ${theme.border}`,
+    borderRadius: '16px',
+    padding: '24px',
+    marginBottom: '20px',
+  };
+
   return (
-    <div className="settings-page">
-      <div className="settings-container">
+    <div className="p-6">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="settings-header">
-          <Link to="/" className="settings-back-btn">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Back
-          </Link>
-          <h1>Settings</h1>
+        <div className="mb-8">
+          <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: theme.text }}>
+            Settings
+          </h1>
+          <p className="text-sm mt-0.5" style={{ color: theme.text2 }}>
+            Manage albums, themes, and preferences.
+          </p>
         </div>
 
         {error && (
@@ -170,36 +282,20 @@ export default function SettingsPage() {
         )}
 
         {/* Theme Section */}
-        <section className="settings-section">
-          <h2>Theme</h2>
-          <div className="theme-grid">
-            {THEMES.map(t => (
-              <button
-                key={t.name}
-                className={`theme-card${theme.name === t.name ? ' active' : ''}`}
-                onClick={() => setThemeByName(t.name)}
-              >
-                <div
-                  className="theme-preview"
-                  style={{ background: t.bg }}
-                >
-                  {t.previewColors.map((color, i) => (
-                    <div
-                      key={i}
-                      className="theme-preview-bar"
-                      style={{ background: color, width: `${90 - i * 15}%` }}
-                    />
-                  ))}
-                </div>
-                <span className="theme-name">{t.name}</span>
-              </button>
-            ))}
-          </div>
-        </section>
+        <div style={sectionStyle}>
+          <h2 className="text-base font-bold mb-1" style={{ color: theme.text }}>Themes</h2>
+          <p style={{ fontSize: '12px', color: theme.text2, marginBottom: '20px' }}>
+            Choose how Stashy looks to you.
+          </p>
+          <ThemePicker />
+        </div>
 
         {/* Albums Section */}
-        <section className="settings-section">
-          <h2>Albums</h2>
+        <div style={sectionStyle}>
+          <h2 className="text-base font-bold mb-1" style={{ color: theme.text }}>Albums</h2>
+          <p style={{ fontSize: '12px', color: theme.text2, marginBottom: '20px' }}>
+            Add folders, scan for media, and reorder how albums appear.
+          </p>
 
           <div className="settings-buttons" style={{ marginBottom: 16 }}>
             <button
@@ -253,22 +349,21 @@ export default function SettingsPage() {
                   <tr>
                     <th style={{ width: 32 }}></th>
                     <th>Name</th>
-                    <th>Path</th>
-                    <th>Files</th>
                     <th>Status</th>
                     <th style={{ textAlign: 'right' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {albums.map((album, index) => (
+                  {combinedList.map((row, index) => (
                     <tr
-                      key={album.id}
+                      key={row.isFavorites ? 'favorites' : row.id}
                       draggable
                       onDragStart={() => handleDragStart(index)}
                       onDragOver={(e) => handleDragOver(e, index)}
                       onDrop={handleDrop}
                       onDragEnd={handleDragEnd}
                       style={{ opacity: dragIndex === index ? 0.4 : 1 }}
+                      className={row.isFavorites ? 'settings-favorites-row' : ''}
                     >
                       <td>
                         <span className="settings-drag-handle">
@@ -282,33 +377,56 @@ export default function SettingsPage() {
                           </svg>
                         </span>
                       </td>
-                      <td style={{ fontWeight: 500 }}>{album.name}</td>
-                      <td style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={album.path}>
-                        {album.path}
+                      <td style={{ fontWeight: 500 }}>
+                        {row.isFavorites ? (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b">
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            {row.name}
+                          </span>
+                        ) : row.name}
                       </td>
-                      <td>{album.file_count || 0}</td>
                       <td>
-                        <span className={`settings-status-badge ${getStatusClass(album.scan_status)}`}>
-                          {album.scan_status || 'idle'}
-                        </span>
+                        {row.isFavorites ? (
+                          <span className="settings-status-badge settings-status-idle">virtual</span>
+                        ) : (
+                          <span className={`settings-status-badge ${getStatusClass(row.scan_status)}`}>
+                            {row.scan_status || 'idle'}
+                          </span>
+                        )}
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
-                          <ThumbnailButton albumId={album.id} size="sm" />
-                          <ScanButton albumId={album.id} onComplete={refresh} size="sm" />
-                          <button
-                            onClick={() => { setEditingAlbum(album); setShowCreate(false); }}
-                            className="settings-action-btn settings-action-btn-blue"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(album)}
-                            className="settings-action-btn settings-action-btn-red"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                        {row.isFavorites ? (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
+                            <span style={{ fontSize: 12, color: theme.text2 }}>Show on home</span>
+                            <label className="settings-toggle" style={{ width: 'auto' }}>
+                              <input
+                                type="checkbox"
+                                checked={settings?.favorites_on_home ?? false}
+                                onChange={e => handleToggleFavoritesOnHome(e.target.checked)}
+                              />
+                              <span className="toggle-slider" />
+                            </label>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
+                            <ThumbnailButton albumId={row.id} size="sm" />
+                            <ScanButton albumId={row.id} onComplete={refresh} size="sm" />
+                            <button
+                              onClick={() => { setEditingAlbum(row.albumData!); setShowCreate(false); }}
+                              className="settings-action-btn settings-action-btn-blue"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(row.albumData!)}
+                              className="settings-action-btn settings-action-btn-red"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -316,13 +434,53 @@ export default function SettingsPage() {
               </table>
             </div>
           )}
-        </section>
+        </div>
+
+        {/* Data Section */}
+        <div style={sectionStyle}>
+          <h2 className="text-base font-bold mb-1" style={{ color: theme.text }}>Data</h2>
+          <p style={{ fontSize: '12px', color: theme.text2, marginBottom: '20px' }}>
+            Export or import your album configuration as JSON. This saves album names, paths, and order — not media files.
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all hover:opacity-80"
+              style={{ background: theme.surface2, color: theme.text, border: `1px solid ${theme.border}` }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              Export Settings
+            </button>
+            <button
+              onClick={() => document.getElementById('stashy-import-input')?.click()}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all hover:opacity-80"
+              style={{ background: theme.surface2, color: theme.text, border: `1px solid ${theme.border}` }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+              Import Settings
+            </button>
+            <input
+              id="stashy-import-input"
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={handleImport}
+            />
+          </div>
+        </div>
 
         {/* Password Protection Section */}
-        <section className="settings-section">
-          <h2>Password Protection</h2>
+        <div className="settings-section" style={sectionStyle}>
+          <h2 className="text-base font-bold mb-1" style={{ color: theme.text }}>Password protection</h2>
+          <p style={{ fontSize: '12px', color: theme.text2, marginBottom: '20px' }}>
+            Optionally lock Stashy with a password.
+          </p>
           <PasswordSettings />
-        </section>
+        </div>
       </div>
     </div>
   );

@@ -11,6 +11,8 @@ import streamingRouter from './routes/streaming.js';
 import homeRouter from './routes/home.js';
 import filesystemRouter from './routes/filesystem.js';
 import authRouter from './routes/auth.js';
+import favoritesRouter from './routes/favorites.js';
+import settingsRouter from './routes/settings.js';
 import { authMiddleware } from './middleware/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -43,6 +45,8 @@ export function createApp() {
   app.use('/api/media', streamingRouter);
   app.use('/api/home', homeRouter);
   app.use('/api/filesystem', filesystemRouter);
+  app.use('/api', favoritesRouter);
+  app.use('/api/settings', settingsRouter);
 
   // In production, serve the client build
   if (isProduction) {

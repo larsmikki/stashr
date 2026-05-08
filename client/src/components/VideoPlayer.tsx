@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Hls from 'hls.js';
-import { streamUrl, transcodeUrl } from '../api/client';
-import type { MediaFile } from '../types';
+import { streamUrl, transcodeUrl } from '@/api/client';
+import type { MediaFile } from '@/types';
 
 interface Props {
   media: MediaFile;
@@ -51,7 +51,7 @@ export default function VideoPlayer({ media }: Props) {
       ref={videoRef}
       controls
       autoPlay
-      className="max-h-[90vh] max-w-full"
+      className="max-h-full max-w-full w-full"
       playsInline
     />
   );

@@ -1,16 +1,20 @@
-import ThumbnailCard from './ThumbnailCard';
-import type { MediaFile } from '../types';
+import ThumbnailCard from '@/components/ThumbnailCard';
+import { useTheme } from '@/contexts/ThemeContext';
+import type { MediaFile } from '@/types';
 
 interface Props {
   items: MediaFile[];
   onMediaClick: (media: MediaFile, index: number) => void;
+  onFavoriteToggle?: (updated: MediaFile) => void;
+  emptyMessage?: string;
 }
 
-export default function MediaGrid({ items, onMediaClick }: Props) {
+export default function MediaGrid({ items, onMediaClick, onFavoriteToggle, emptyMessage }: Props) {
+  const { theme } = useTheme();
   if (!items.length) {
     return (
-      <p className="text-gray-500 dark:text-gray-400 text-center py-12">
-        No media found. Try scanning this album first.
+      <p className="text-center py-12" style={{ color: theme.text2 }}>
+        {emptyMessage ?? 'No media found. Try scanning this album first.'}
       </p>
     );
   }
@@ -22,6 +26,7 @@ export default function MediaGrid({ items, onMediaClick }: Props) {
           key={media.id}
           media={media}
           onClick={() => onMediaClick(media, index)}
+          onFavoriteToggle={onFavoriteToggle}
         />
       ))}
     </div>

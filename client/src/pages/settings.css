@@ -1,61 +1,8 @@
 /* ---- Settings Page ---- */
-.settings-page {
-  min-height: 100%;
-  padding: 24px;
-}
-
-.settings-container {
-  max-width: 560px;
-  margin: 0 auto;
-}
-
-.settings-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.settings-header h1 {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--settings-text, #1a1a2e);
-}
-
-.settings-back-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--settings-border, rgba(0,0,0,0.1));
-  background: var(--settings-surface, white);
-  color: var(--settings-text2, #555);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-  text-decoration: none;
-}
-.settings-back-btn:hover {
-  background: var(--settings-surface2, #f5f5f5);
-}
-
-.settings-section {
-  background: var(--settings-surface, white);
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  border: 1px solid var(--settings-border, rgba(0,0,0,0.06));
-}
-
 .settings-section h2 {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--settings-text, #1a1a2e);
-  margin-bottom: 20px;
 }
 
 .settings-field {
@@ -73,57 +20,13 @@
   margin-bottom: 8px;
 }
 
-/* Theme cards */
-.theme-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
+.settings-favorites-row td {
+  background: var(--settings-surface2, #fafafa);
+}
+.settings-favorites-row:hover td {
+  background: var(--settings-surface2, #f5f5f5) !important;
 }
 
-.theme-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 12px;
-  border: 2px solid transparent;
-  background: none;
-  cursor: pointer;
-  transition: border-color 0.15s, transform 0.1s;
-  font-family: inherit;
-}
-.theme-card:hover {
-  border-color: rgba(225,29,72,0.3);
-  transform: scale(1.03);
-}
-.theme-card.active {
-  border-color: var(--settings-accent, #e11d48);
-}
-
-.theme-preview {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 8px;
-  border: 1px solid var(--settings-border, rgba(0,0,0,0.08));
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 10px;
-}
-
-.theme-preview-bar {
-  height: 6px;
-  border-radius: 3px;
-  width: 100%;
-}
-
-.theme-name {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--settings-text2, #555);
-}
 
 .settings-buttons {
   display: flex;
@@ -274,19 +177,23 @@
 .settings-section .password-form input[type="password"] {
   width: 100%;
   max-width: 280px;
-  padding: 8px 12px;
-  border: 1px solid var(--settings-border, rgba(0,0,0,0.1));
-  border-radius: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--settings-border, rgba(0,0,0,0.15));
+  border-radius: 10px;
   font-size: 14px;
   font-family: inherit;
-  background: var(--settings-surface, white);
+  background: var(--settings-surface2, var(--settings-surface, #fff));
   color: var(--settings-text, #333);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 .settings-section .password-form input[type="password"]:focus {
   border-color: var(--settings-accent, #e11d48);
-  box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
+}
+.settings-section .password-form input[type="password"]::placeholder {
+  color: var(--settings-text2, #999);
+  opacity: 0.6;
 }
 .settings-section .password-form label {
   display: block;
@@ -324,5 +231,5 @@
 @media (max-width: 480px) {
   .settings-page { padding: 12px; }
   .settings-section { padding: 16px; }
-  .theme-grid { grid-template-columns: repeat(3, 1fr); }
+  .theme-grid { grid-template-columns: repeat(5, 1fr); }
 }

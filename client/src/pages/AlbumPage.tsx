@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { getAlbum } from '../api/client';
-import { useMedia } from '../hooks/useMedia';
-import MediaGrid from '../components/MediaGrid';
-import MediaViewer from '../components/MediaViewer';
-import SlideshowMode from '../components/SlideshowMode';
-import SortControls from '../components/SortControls';
-import ScanButton from '../components/ScanButton';
-import type { Album, MediaFile } from '../types';
+import { useParams } from 'react-router-dom';
+import { getAlbum, getMedia } from '@/api/client';
+import { useMedia } from '@/hooks/useMedia';
+import MediaGrid from '@/components/MediaGrid';
+import MediaViewer from '@/components/MediaViewer';
+import SlideshowMode from '@/components/SlideshowMode';
+import SortControls from '@/components/SortControls';
+import { useTheme } from '@/contexts/ThemeContext';
+import type { Album, MediaFile } from '@/types';
 
 export default function AlbumPage() {
   const { id } = useParams<{ id: string }>();
   const albumId = Number(id);
+  const { theme } = useTheme();
   const [album, setAlbum] = useState<Album | null>(null);
   const [sort, setSort] = useState('date');
   const [order, setOrder] = useState('desc');
@@ -23,8 +24,10 @@ export default function AlbumPage() {
   const [viewerMedia, setViewerMedia] = useState<MediaFile | null>(null);
   const [viewerIndex, setViewerIndex] = useState(0);
   const [showSlideshow, setShowSlideshow] = useState(false);
+  const [slideshowItems, setSlideshowItems] = useState<MediaFile[]>([]);
+  const [slideshowLoading, setSlideshowLoading] = useState(false);
 
-  const { items, total, totalPages, loading, refresh } = useMedia({
+  const { items, total, totalPages, loading } = useMedia({
     albumId,
     sort,
     order,
@@ -41,37 +44,72 @@ export default function AlbumPage() {
     setViewerMedia(items[index]);
   };
 
+  const startSlideshow = async () => {
+    setSlideshowLoading(true);
+    try {
+      const PAGE_SIZE = 500;
+      const first = await getMedia(albumId, { sort, order, page: 1, limit: PAGE_SIZE });
+      let all = first.items;
+      if (first.totalPages > 1) {
+        const rest = await Promise.all(
+          Array.from({ length: first.totalPages - 1 }, (_, i) =>
+            getMedia(albumId, { sort, order, page: i + 2, limit: PAGE_SIZE })
+          )
+        );
+        all = all.concat(rest.flatMap(p => p.items));
+      }
+      setSlideshowItems(all);
+      setShowSlideshow(true);
+    } finally {
+      setSlideshowLoading(false);
+    }
+  };
+
+  const handleFavoriteToggle = (updated: MediaFile) => {
+    const idx = items.findIndex(m => m.id === updated.id);
+    if (idx !== -1) {
+      items[idx] = updated;
+      if (viewerMedia?.id === updated.id) setViewerMedia(updated);
+    }
+  };
+
+  const controlStyle = {
+    padding: '6px 12px',
+    fontSize: '13px',
+    border: `1px solid ${theme.border}`,
+    borderRadius: '8px',
+    background: theme.surface,
+    color: theme.text,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  };
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <Link to="/" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{album?.name || 'Album'}</h1>
-          <span className="text-sm text-gray-500 dark:text-gray-400">{total} items</span>
+          <h1 className="text-2xl font-bold" style={{ color: theme.text }}>{album?.name || 'Album'}</h1>
+          <span className="text-sm" style={{ color: theme.text2 }}>{total} items</span>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <SortControls sort={sort} order={order} onSortChange={setSort} onOrderChange={setOrder} />
           <select
             value={limit}
             onChange={(e) => { const v = Number(e.target.value); setLimit(v); setPage(1); localStorage.setItem('stashy-per-page', String(v)); }}
-            className="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            style={controlStyle}
           >
             {[50, 100, 200, 300, 500].map(n => (
               <option key={n} value={n}>{n} per page</option>
             ))}
           </select>
-          <ScanButton albumId={albumId} onComplete={refresh} />
           {items.some(m => m.file_type === 'image') && (
             <button
-              onClick={() => setShowSlideshow(true)}
-              className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700"
+              onClick={startSlideshow}
+              disabled={slideshowLoading}
+              style={{ ...controlStyle, background: theme.gradient, color: 'white', border: 'none', fontWeight: 600, opacity: slideshowLoading ? 0.7 : 1 }}
             >
-              Slideshow
+              {slideshowLoading ? 'Loading…' : 'Slideshow'}
             </button>
           )}
         </div>
@@ -79,9 +117,9 @@ export default function AlbumPage() {
 
       {/* Grid */}
       {loading ? (
-        <div className="text-center py-16 text-gray-500 dark:text-gray-400">Loading...</div>
+        <div className="text-center py-16" style={{ color: theme.text2 }}>Loading...</div>
       ) : (
-        <MediaGrid items={items} onMediaClick={handleMediaClick} />
+        <MediaGrid items={items} onMediaClick={handleMediaClick} onFavoriteToggle={handleFavoriteToggle} />
       )}
 
       {/* Pagination */}
@@ -90,17 +128,17 @@ export default function AlbumPage() {
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+            style={{ ...controlStyle, opacity: page === 1 ? 0.5 : 1 }}
           >
             Previous
           </button>
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-sm" style={{ color: theme.text2 }}>
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+            style={{ ...controlStyle, opacity: page === totalPages ? 0.5 : 1 }}
           >
             Next
           </button>
@@ -120,14 +158,15 @@ export default function AlbumPage() {
           }}
           onSlideshow={() => {
             setViewerMedia(null);
-            setShowSlideshow(true);
+            startSlideshow();
           }}
+          onFavoriteToggle={handleFavoriteToggle}
         />
       )}
 
       {/* Slideshow */}
       {showSlideshow && (
-        <SlideshowMode items={items} onClose={() => setShowSlideshow(false)} />
+        <SlideshowMode items={slideshowItems} onClose={() => { setShowSlideshow(false); setSlideshowItems([]); }} />
       )}
     </div>
   );

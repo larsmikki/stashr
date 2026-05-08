@@ -25,6 +25,45 @@ router.get('/', (_req: Request, res: Response) => {
       return { ...album, media };
     });
 
+    // Check if favorites should appear on home
+    const favOnHomeSetting = db.exec("SELECT value FROM app_settings WHERE key = 'favorites_on_home'");
+    const favOnHome = favOnHomeSetting.length && favOnHomeSetting[0].values.length
+      ? favOnHomeSetting[0].values[0][0] === '1'
+      : false;
+
+    if (favOnHome) {
+      const favSortOrderSetting = db.exec("SELECT value FROM app_settings WHERE key = 'favorites_sort_order'");
+      const favSortOrder = favSortOrderSetting.length && favSortOrderSetting[0].values.length
+        ? Number(favSortOrderSetting[0].values[0][0])
+        : 9999;
+
+      const favMediaResult = db.exec(
+        `SELECT ${MEDIA_COLUMNS} FROM media_files WHERE is_favorite = 1 ORDER BY RANDOM() LIMIT $limit`,
+        { $limit: limit },
+      );
+      const favMedia = favMediaResult.length ? favMediaResult[0].values.map(rowToMedia) : [];
+
+      if (favMedia.length > 0) {
+        const favCountResult = db.exec('SELECT COUNT(*) FROM media_files WHERE is_favorite = 1');
+        const favCount = favCountResult.length ? (favCountResult[0].values[0][0] as number) : 0;
+
+        const favAlbum: HomeAlbum = {
+          id: -1,
+          name: 'Favorites',
+          path: '',
+          created_at: '',
+          updated_at: '',
+          sort_order: favSortOrder,
+          file_count: favCount,
+          is_favorites: true,
+          media: favMedia,
+        };
+
+        const insertPos = Math.min(favSortOrder, result.length);
+        result.splice(insertPos, 0, favAlbum);
+      }
+    }
+
     res.json({ albums: result });
   } catch (err) {
     res.status(500).json({ error: getErrorMessage(err, 'Failed to load home data') });

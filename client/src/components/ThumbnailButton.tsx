@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { generateThumbnails, getThumbnailStatus } from '../api/client';
-import { SCAN_POLL_INTERVAL_MS } from '../constants';
-import type { ThumbnailStatus } from '../types';
+import { generateThumbnails, getThumbnailStatus } from '@/api/client';
+import { SCAN_POLL_INTERVAL_MS } from '@/constants';
+import type { ThumbnailStatus } from '@/types';
 
 interface Props {
   albumId: number;
@@ -13,7 +13,6 @@ export default function ThumbnailButton({ albumId, size = 'sm' }: Props) {
   const [generating, setGenerating] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Fetch initial status
   useEffect(() => {
     getThumbnailStatus(albumId).then(s => {
       setStatus(s);
@@ -57,12 +56,11 @@ export default function ThumbnailButton({ albumId, size = 'sm' }: Props) {
 
   const allDone = status ? status.total > 0 && status.pending === 0 && status.failed === 0 : false;
 
-  const sizeClass = size === 'sm'
-    ? 'px-2 py-1 text-xs'
-    : 'px-3 py-1.5 text-sm';
-
-  // Don't show if no files at all
   if (status && status.total === 0) return null;
+
+  const btnClass = size === 'sm'
+    ? `settings-action-btn ${allDone ? '' : 'settings-action-btn-purple'}`
+    : '';
 
   return (
     <div className="inline-flex items-center gap-1.5">
@@ -76,11 +74,8 @@ export default function ThumbnailButton({ albumId, size = 'sm' }: Props) {
             ? 'Generating thumbnails...'
             : `Generate thumbnails (${status?.pending ?? 0} pending, ${status?.failed ?? 0} failed)`
         }
-        className={`${sizeClass} rounded-md inline-flex items-center gap-1 ${
-          allDone
-            ? 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-default'
-            : 'bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50'
-        }`}
+        className={`${btnClass} inline-flex items-center gap-1`}
+        style={allDone ? { background: 'var(--settings-surface2, #f3f4f6)', color: 'var(--settings-text2, #6b7084)' } : undefined}
       >
         {generating ? (
           <>

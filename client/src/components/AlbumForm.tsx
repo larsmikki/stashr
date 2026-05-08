@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import FileBrowser from './FileBrowser';
+import FileBrowser from '@/components/FileBrowser';
 
 interface Props {
   initialName?: string;

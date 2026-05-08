@@ -2,7 +2,7 @@
 
 A self-hosted personal media gallery for browsing images and videos over LAN.
 
-![Stashy screenshot](screenshot.png)
+![Stashy screenshot](resources/screenshot.png)
 
 ## Features
 

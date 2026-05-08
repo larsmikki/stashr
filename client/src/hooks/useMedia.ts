@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getMedia } from '../api/client';
-import { getErrorMessage } from '../utils/errors';
-import type { MediaFile } from '../types';
+import { getMedia } from '@/api/client';
+import { getErrorMessage } from '@/utils/errors';
+import type { MediaFile } from '@/types';
 
 interface UseMediaOptions {
   albumId: number;

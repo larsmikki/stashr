@@ -48,7 +48,7 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   return res.json();
 }
 
-import type { Album, HomeAlbum, MediaFile, PaginatedResponse, BrowseResult, ScanStatus, ThumbnailStatus } from '../types';
+import type { Album, HomeAlbum, MediaFile, PaginatedResponse, BrowseResult, ScanStatus, ThumbnailStatus } from '@/types';
 
 // Auth
 export interface AuthStatus {
@@ -119,6 +119,29 @@ export const getMedia = (albumId: number, params: { sort?: string; order?: strin
   if (params.limit) qs.set('limit', String(params.limit));
   return request<PaginatedResponse<MediaFile>>(`/api/albums/${albumId}/media?${qs}`);
 };
+
+// Favorites
+export const toggleFavorite = (mediaId: number) =>
+  request<MediaFile>(`/api/media/${mediaId}/favorite`, { method: 'PUT' });
+
+export const getFavorites = (params: { sort?: string; order?: string; page?: number; limit?: number }) => {
+  const qs = new URLSearchParams();
+  if (params.sort) qs.set('sort', params.sort);
+  if (params.order) qs.set('order', params.order);
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+  return request<PaginatedResponse<MediaFile>>(`/api/favorites?${qs}`);
+};
+
+// Settings
+export interface AppSettings {
+  favorites_on_home: boolean;
+  favorites_sort_order: number;
+  favorites_count: number;
+}
+export const getSettings = () => request<AppSettings>('/api/settings');
+export const updateSettings = (data: Partial<Pick<AppSettings, 'favorites_on_home' | 'favorites_sort_order'>>) =>
+  request<{ status: string }>('/api/settings', { method: 'PUT', body: JSON.stringify(data) });
 
 // Home
 export const getHome = () => request<{ albums: HomeAlbum[] }>('/api/home');

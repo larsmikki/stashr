@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import * as api from '../api/client';
+import * as api from '@/api/client';
 
 interface AuthContextValue {
   loading: boolean;

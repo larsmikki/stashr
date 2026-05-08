@@ -14,3 +14,12 @@ cache/transcoded/*
 *.tsbuildinfo
 test_album/
 .claude/
+coverage/
+.nyc_output/
+tasks/
+
+# Editor and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

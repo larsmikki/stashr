@@ -24,6 +24,7 @@ export interface MediaFile {
   scanned_at: string;
   thumbnail_path: string | null;
   thumbnail_generated: number;
+  is_favorite: number;
 }
 
 export interface ScanState {
@@ -55,4 +56,5 @@ export interface PaginatedResponse<T> {
 
 export interface HomeAlbum extends Album {
   media: MediaFile[];
+  is_favorites?: boolean;
 }

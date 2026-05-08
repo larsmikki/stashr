@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { theme } = useTheme();
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,16 +26,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: theme.bg }}>
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center mb-8">Stashy</h1>
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+        <h1 className="text-2xl font-black tracking-tight gradient-text text-center mb-8">Stashy</h1>
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 rounded-2xl"
+          style={{ background: theme.surface, border: `1px solid ${theme.border}` }}
+        >
           {error && (
-            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-400 text-sm">
+            <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: '#fee2e2', border: '1px solid #fecaca', color: '#dc2626' }}>
               {error}
             </div>
           )}
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="password" className="block text-sm font-medium mb-1" style={{ color: theme.text2 }}>
             Password
           </label>
           <input
@@ -41,14 +47,20 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 rounded-lg text-sm"
+            style={{
+              border: `1px solid ${theme.border}`,
+              background: theme.surface2,
+              color: theme.text,
+            }}
             placeholder="Enter password"
             autoFocus
           />
           <button
             type="submit"
             disabled={loading || !password}
-            className="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+            className="mt-4 w-full px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50"
+            style={{ background: theme.gradient, border: 'none', cursor: loading || !password ? 'not-allowed' : 'pointer' }}
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>

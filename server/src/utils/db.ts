@@ -1,6 +1,6 @@
 import type { MediaFile } from '../types/index.js';
 
-export const MEDIA_COLUMNS = 'id, album_id, file_path, relative_path, filename, file_type, file_size, mime_type, created_at, modified_at, scanned_at, thumbnail_path, thumbnail_generated';
+export const MEDIA_COLUMNS = 'id, album_id, file_path, relative_path, filename, file_type, file_size, mime_type, created_at, modified_at, scanned_at, thumbnail_path, thumbnail_generated, is_favorite';
 
 export function rowToMedia(row: unknown[]): MediaFile {
   return {
@@ -17,6 +17,7 @@ export function rowToMedia(row: unknown[]): MediaFile {
     scanned_at: row[10] as string,
     thumbnail_path: row[11] as string | null,
     thumbnail_generated: row[12] as number,
+    is_favorite: row[13] as number,
   };
 }
 

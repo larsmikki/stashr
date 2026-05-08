@@ -11,7 +11,8 @@ router.get('/:albumId/media', (req: Request, res: Response) => {
   try {
     const db = getDb();
     const albumId = Number(req.params.albumId);
-    const sort = req.query.sort === 'name' ? 'name' : 'date';
+    const sortParam = req.query.sort;
+    const sort = sortParam === 'name' ? 'name' : sortParam === 'random' ? 'random' : 'date';
     const order = req.query.order === 'asc' ? 'ASC' : 'DESC';
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(
@@ -20,7 +21,9 @@ router.get('/:albumId/media', (req: Request, res: Response) => {
     );
     const offset = (page - 1) * limit;
 
-    const orderColumn = sort === 'name' ? 'filename' : 'created_at';
+    const orderClause = sort === 'random'
+      ? 'RANDOM()'
+      : `${sort === 'name' ? 'filename' : 'created_at'} ${order}`;
 
     // Get total count
     const countResult = db.exec(
@@ -33,7 +36,7 @@ router.get('/:albumId/media', (req: Request, res: Response) => {
     const result = db.exec(
       `SELECT ${MEDIA_COLUMNS}
        FROM media_files WHERE album_id = $id
-       ORDER BY ${orderColumn} ${order}
+       ORDER BY ${orderClause}
        LIMIT $limit OFFSET $offset`,
       { $id: albumId, $limit: limit, $offset: offset },
     );

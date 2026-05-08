@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import * as api from '../api/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { LockIcon, UnlockIcon } from '@/components/Layout';
+import * as api from '@/api/client';
 
 export default function PasswordSettings() {
   const { passwordSet, refreshAuth } = useAuth();
+  const { theme } = useTheme();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -65,8 +68,9 @@ export default function PasswordSettings() {
 
       {!passwordSet ? (
         <form onSubmit={handleSetPassword} className="password-form">
-          <p className="settings-info-text">
-            No password is set. The app is accessible to anyone on your network.
+          <p className="settings-info-text" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: theme.text2 }}><UnlockIcon /></span>
+            No password is set — app is accessible to anyone on your network.
           </p>
           <div className="settings-field">
             <label htmlFor="new-password">Password</label>
@@ -90,7 +94,8 @@ export default function PasswordSettings() {
         </form>
       ) : (
         <div className="password-form">
-          <p className="settings-info-text">
+          <p className="settings-info-text" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: theme.accent }}><LockIcon /></span>
             Password protection is enabled.
           </p>
 

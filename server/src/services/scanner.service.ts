@@ -32,8 +32,8 @@ function walkDirectory(dir: string, rootDir: string): FileEntry[] {
       const fullPath = path.join(currentDir, item.name);
 
       if (item.isDirectory()) {
-        // Skip hidden directories
-        if (!item.name.startsWith('.')) {
+        // Skip hidden directories and Synology metadata directories (@eaDir, etc.)
+        if (!item.name.startsWith('.') && !item.name.startsWith('@')) {
           walk(fullPath);
         }
         continue;

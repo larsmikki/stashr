@@ -1,33 +1,40 @@
-import { Link, Outlet } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { Link, NavLink, Outlet } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import Footer from '@/components/Footer';
 
-function StashIcon() {
-  return (
-    <svg
-      width="36"
-      height="36"
-      viewBox="0 0 36 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0"
-    >
-      <defs>
-        <linearGradient id="stashy-bg" x1="0" y1="0" x2="0" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#fb7185"/>
-          <stop offset="100%" stopColor="#e11d48"/>
-        </linearGradient>
-      </defs>
-      <rect width="36" height="36" rx="8" fill="url(#stashy-bg)" />
-      <rect x="7" y="9" width="22" height="18" rx="2" fill="none" stroke="white" strokeWidth="2" opacity="0.95"/>
-      <polygon points="10,24 17,15 24,24" fill="white" opacity="0.7"/>
-      <polygon points="18,24 23,17 29,24" fill="white" opacity="0.5"/>
-      <circle cx="24" cy="14" r="2.5" fill="white" opacity="0.85"/>
-    </svg>
-  );
+function LogoMark({ size = 28 }: { size?: number }) {
+  return <img src="/favicon.svg" width={size} height={size} alt="Stashy" className="shrink-0" />;
 }
+
+const FavoritesIcon = () => (
+  <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+  </svg>
+);
+
+
+const SettingsIcon = () => (
+  <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+  </svg>
+);
+
+export const LockIcon = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+  </svg>
+);
+
+export const UnlockIcon = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+  </svg>
+);
 
 export default function Layout() {
   const { passwordSet, authenticated, logout } = useAuth();
+  const { theme } = useTheme();
 
   const handleLock = () => {
     if (window.confirm('Lock Stashy? You will need to enter the password again.')) {
@@ -35,43 +42,67 @@ export default function Layout() {
     }
   };
 
+  const navItems = [
+    { to: '/favorites', label: 'Favorites', icon: <FavoritesIcon /> },
+    { to: '/settings', label: 'Settings', icon: <SettingsIcon /> },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 shadow-sm">
-        <div className="px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-            <StashIcon />
-            Stashy
+    <div className="min-h-screen flex flex-col" style={{ background: theme.bg, color: theme.text }}>
+      <header
+        className="sticky top-0 z-40 backdrop-blur-md"
+        style={{
+          background: `${theme.surface}dd`,
+          borderBottom: `1px solid ${theme.border}`,
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2.5" style={{ textDecoration: 'none' }}>
+            <LogoMark size={28} />
+            <span className="text-xl font-extrabold tracking-tight gradient-text select-none">
+              Stashy
+            </span>
           </Link>
-          <div className="flex items-center gap-2">
+
+          {/* Nav */}
+          <nav className="flex items-center gap-0.5">
+            {navItems.map(item => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150"
+                style={({ isActive }) =>
+                  isActive
+                    ? { background: `${theme.accent}22`, color: theme.accent }
+                    : { color: theme.text2 }
+                }
+              >
+                {item.icon}
+                <span className="hidden sm:inline">{item.label}</span>
+              </NavLink>
+            ))}
+
             {passwordSet && authenticated && (
               <button
                 onClick={handleLock}
-                className="p-2 rounded-md bg-gray-100 border border-gray-200 text-green-600 hover:bg-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-green-400 dark:hover:bg-gray-600 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150"
+                style={{ color: theme.text2 }}
                 title="Lock"
-                aria-label="Lock"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                </svg>
+                <LockIcon />
+                <span className="hidden sm:inline">Lock</span>
               </button>
             )}
-            <Link
-              to="/settings"
-              className="p-2 rounded-md bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 transition-colors"
-              aria-label="Settings"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            </Link>
-          </div>
+          </nav>
         </div>
       </header>
+
       <main className="flex-1">
         <Outlet />
       </main>
+
+      <Footer />
     </div>
   );
 }

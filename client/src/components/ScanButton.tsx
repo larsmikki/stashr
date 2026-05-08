@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { scanAlbum, getScanStatus } from '../api/client';
-import { SCAN_POLL_INTERVAL_MS } from '../constants';
+import { scanAlbum, getScanStatus } from '@/api/client';
+import { SCAN_POLL_INTERVAL_MS } from '@/constants';
 
 interface Props {
   albumId: number;
@@ -17,7 +17,6 @@ export default function ScanButton({ albumId, onComplete, size = 'md' }: Props) 
       setScanning(true);
       await scanAlbum(albumId);
 
-      // Poll for completion
       pollRef.current = setInterval(async () => {
         try {
           const status = await getScanStatus(albumId);
@@ -42,15 +41,29 @@ export default function ScanButton({ albumId, onComplete, size = 'md' }: Props) 
     };
   }, []);
 
-  const sizeClass = size === 'sm'
-    ? 'px-2 py-1 text-xs'
-    : 'px-3 py-1.5 text-sm';
+  const sizeClass = size === 'sm' ? 'settings-action-btn settings-action-btn-green' : '';
+  const mdStyle = size === 'md' ? {
+    padding: '6px 12px',
+    fontSize: '13px',
+    borderRadius: '8px',
+    background: '#dcfce7',
+    color: '#16a34a',
+    border: 'none',
+    cursor: scanning ? 'not-allowed' : 'pointer',
+    opacity: scanning ? 0.6 : 1,
+    display: 'inline-flex' as const,
+    alignItems: 'center',
+    gap: '6px',
+    fontFamily: 'inherit',
+    fontWeight: 500,
+  } : undefined;
 
   return (
     <button
       onClick={startScan}
       disabled={scanning}
-      className={`${sizeClass} bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 inline-flex items-center gap-1.5`}
+      className={`${sizeClass} inline-flex items-center gap-1.5`}
+      style={mdStyle}
     >
       {scanning ? (
         <>

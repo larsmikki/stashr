@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { browsePath } from '../api/client';
-import { getErrorMessage } from '../utils/errors';
-import type { BrowseResult } from '../types';
+import { browsePath } from '@/api/client';
+import { getErrorMessage } from '@/utils/errors';
+import type { BrowseResult } from '@/types';
 
 interface Props {
   isOpen: boolean;
