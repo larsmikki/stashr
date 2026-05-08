@@ -2,6 +2,11 @@
 
 A self-hosted personal media gallery for browsing images and videos over LAN.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-larsmikki%2Fstashy-blue?logo=docker)](https://hub.docker.com/r/larsmikki/stashy)
+[![ghcr.io](https://img.shields.io/badge/ghcr.io-larsmikki%2Fstashy-blue?logo=github)](https://github.com/larsmikki/stashy/pkgs/container/stashy)
+[![Node 20](https://img.shields.io/badge/Node-20-brightgreen?logo=node.js)](https://nodejs.org/)
+
 ![Stashy screenshot](resources/screenshot.png)
 
 ## Features
