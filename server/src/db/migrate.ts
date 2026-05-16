@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getDb, saveDb } from './connection.js';
+import { getDb } from './connection.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -39,6 +39,4 @@ export function runMigrations(): void {
     db.run(sql);
     db.run(`INSERT INTO _migrations (name) VALUES ($name)`, { $name: file });
   }
-
-  saveDb();
 }

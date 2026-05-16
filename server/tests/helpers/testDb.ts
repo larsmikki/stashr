@@ -1,6 +1,7 @@
-import initSqlJs, { type Database } from 'sql.js';
+import Database from 'better-sqlite3';
+import type { CompatDb } from '../../src/db/connection.js';
 
-// Full schema combining all 5 migrations
+// Full schema combining all migrations
 const SCHEMA = `
   PRAGMA foreign_keys = ON;
 
@@ -63,13 +64,52 @@ const SCHEMA = `
   INSERT OR IGNORE INTO app_settings (key, value) VALUES ('favorites_sort_order', '9999');
 `;
 
-let sqlInstance: Awaited<ReturnType<typeof initSqlJs>> | null = null;
-
-export async function createTestDb(): Promise<Database> {
-  if (!sqlInstance) {
-    sqlInstance = await initSqlJs();
+function stripPrefix(params: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const k of Object.keys(params)) {
+    const name = k.startsWith('$') || k.startsWith('@') || k.startsWith(':') ? k.slice(1) : k;
+    out[name] = params[k];
   }
-  const db = new sqlInstance.Database();
-  db.exec(SCHEMA);
-  return db;
+  return out;
+}
+
+function isMultiStatement(sql: string): boolean {
+  const stripped = sql.replace(/'(?:''|[^'])*'/g, '').replace(/--[^\n]*/g, '');
+  return stripped.split(';').map(s => s.trim()).filter(Boolean).length > 1;
+}
+
+export async function createTestDb(): Promise<CompatDb> {
+  const raw = new Database(':memory:');
+  raw.pragma('foreign_keys = ON');
+  raw.exec(SCHEMA);
+
+  return {
+    raw,
+    run(sql, params) {
+      if (!params) {
+        if (isMultiStatement(sql)) {
+          raw.exec(sql);
+          return;
+        }
+        raw.prepare(sql).run();
+        return;
+      }
+      raw.prepare(sql).run(stripPrefix(params));
+    },
+    exec(sql, params) {
+      const stmt = raw.prepare(sql);
+      if (!stmt.reader) {
+        if (params) stmt.run(stripPrefix(params));
+        else stmt.run();
+        return [];
+      }
+      const rows = (params ? stmt.raw().all(stripPrefix(params)) : stmt.raw().all()) as unknown[][];
+      if (!rows.length) return [];
+      const columns = stmt.columns().map(c => c.name);
+      return [{ columns, values: rows }];
+    },
+    transaction(fn) {
+      return raw.transaction(fn)();
+    },
+  };
 }

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getDb, saveDb } from '../db/connection.js';
+import { getDb } from '../db/connection.js';
 import { config } from '../config.js';
 import { rowToMedia, MEDIA_COLUMNS, getErrorMessage } from '../utils/db.js';
 import type { MediaFile, PaginatedResponse } from '../types/index.js';
@@ -22,12 +22,35 @@ router.put('/media/:mediaId/favorite', (req: Request, res: Response) => {
     const newValue = media.is_favorite ? 0 : 1;
 
     db.run('UPDATE media_files SET is_favorite = $val WHERE id = $id', { $val: newValue, $id: mediaId });
-    saveDb();
 
     const updated = db.exec(`SELECT ${MEDIA_COLUMNS} FROM media_files WHERE id = $id`, { $id: mediaId });
     res.json(rowToMedia(updated[0].values[0]));
   } catch (err) {
     res.status(500).json({ error: getErrorMessage(err, 'Failed to toggle favorite') });
+  }
+});
+
+// Bulk-set favorite status for many media items at once.
+router.put('/media/bulk-favorite', (req: Request, res: Response) => {
+  try {
+    const db = getDb();
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+    const favorite = req.body?.favorite === true ? 1 : 0;
+    const cleanIds = ids
+      .map((n: unknown) => Number(n))
+      .filter((n: number) => Number.isInteger(n) && n > 0);
+    if (!cleanIds.length) {
+      res.status(400).json({ error: 'ids must be a non-empty array of integers' });
+      return;
+    }
+    const stmt = db.raw.prepare('UPDATE media_files SET is_favorite = ? WHERE id = ?');
+    const tx = db.raw.transaction((list: number[]) => {
+      for (const id of list) stmt.run(favorite, id);
+    });
+    tx(cleanIds);
+    res.json({ status: 'ok', updated: cleanIds.length, favorite: !!favorite });
+  } catch (err) {
+    res.status(500).json({ error: getErrorMessage(err, 'Failed to bulk-update favorites') });
   }
 });
 

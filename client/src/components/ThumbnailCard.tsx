@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { toast } from 'sonner';
 import { thumbnailUrl, toggleFavorite } from '@/api/client';
+import { getErrorMessage } from '@/utils/errors';
 import { useTheme } from '@/contexts/ThemeContext';
 import type { MediaFile } from '@/types';
 
@@ -8,29 +9,58 @@ interface Props {
   onClick: () => void;
   onFavoriteToggle?: (updated: MediaFile) => void;
   size?: 'sm' | 'md';
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: (id: number, withRange: boolean) => void;
 }
 
-export default function ThumbnailCard({ media, onClick, onFavoriteToggle, size = 'md' }: Props) {
+export default function ThumbnailCard({
+  media,
+  onClick,
+  onFavoriteToggle,
+  size = 'md',
+  selectable = false,
+  selected = false,
+  onToggleSelect,
+}: Props) {
   const { theme } = useTheme();
   const sizeClass = size === 'sm' ? 'w-44 h-44' : 'w-full aspect-square';
-  const [isFavorite, setIsFavorite] = useState(!!media.is_favorite);
+  const isFavorite = !!media.is_favorite;
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       const updated = await toggleFavorite(media.id);
-      setIsFavorite(!!updated.is_favorite);
       onFavoriteToggle?.(updated);
-    } catch {
-      // silently ignore
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Could not update favorite'));
     }
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Modifier-click or ctrl-click selects rather than opens. Shift extends a range.
+    if (selectable && onToggleSelect && (e.ctrlKey || e.metaKey || e.shiftKey || selected)) {
+      e.preventDefault();
+      onToggleSelect(media.id, e.shiftKey);
+      return;
+    }
+    onClick();
+  };
+
+  const handleSelectIcon = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleSelect?.(media.id, e.shiftKey);
   };
 
   return (
     <button
-      onClick={onClick}
+      onClick={handleCardClick}
       className={`${sizeClass} relative group overflow-hidden rounded-xl flex-shrink-0 cursor-pointer focus:outline-none card-hover`}
-      style={{ background: theme.surface2 }}
+      style={{
+        background: theme.surface2,
+        outline: selected ? `3px solid ${theme.accent}` : undefined,
+        outlineOffset: selected ? -3 : undefined,
+      }}
     >
       <img
         src={thumbnailUrl(media.id)}
@@ -47,6 +77,30 @@ export default function ThumbnailCard({ media, onClick, onFavoriteToggle, size =
           </div>
         </div>
       )}
+
+      {/* Selection checkbox */}
+      {selectable && (
+        <button
+          onClick={handleSelectIcon}
+          aria-label={selected ? 'Deselect' : 'Select'}
+          className={`absolute top-1.5 left-1.5 z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all
+            ${selected
+              ? 'opacity-100 text-white'
+              : 'opacity-0 group-hover:opacity-100 bg-black/40 text-white/80'}`}
+          style={selected ? { background: theme.accent } : undefined}
+        >
+          {selected ? (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" />
+            </svg>
+          )}
+        </button>
+      )}
+
       {/* Favorite button */}
       <button
         onClick={handleFavorite}

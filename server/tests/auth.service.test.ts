@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Database } from 'sql.js';
+import type { CompatDb as Database } from '../src/db/connection.js';
 import { createTestDb } from './helpers/testDb.js';
 
 // vi.hoisted ensures dbRef is available inside the vi.mock factory (which is hoisted before imports)

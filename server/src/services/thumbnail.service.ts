@@ -3,7 +3,7 @@ import path from 'path';
 import { execFile } from 'child_process';
 import sharp from 'sharp';
 import ffmpeg from 'fluent-ffmpeg';
-import { getDb, saveDb } from '../db/connection.js';
+import { getDb } from '../db/connection.js';
 import { config } from '../config.js';
 import { rowToMedia, MEDIA_COLUMNS } from '../utils/db.js';
 import type { MediaFile } from '../types/index.js';
@@ -85,7 +85,6 @@ export async function generateThumbnail(media: MediaFile): Promise<string | null
       `UPDATE media_files SET thumbnail_generated = 1, thumbnail_path = $path WHERE id = $id`,
       { $path: outputPath, $id: media.id },
     );
-    saveDb();
 
     return outputPath;
   } catch (err) {
@@ -94,7 +93,6 @@ export async function generateThumbnail(media: MediaFile): Promise<string | null
       `UPDATE media_files SET thumbnail_generated = 2 WHERE id = $id`,
       { $id: media.id },
     );
-    saveDb();
     return null;
   }
 }
@@ -175,7 +173,6 @@ export function startThumbnailGeneration(albumId: number, retryFailed = true): b
            WHERE album_id = $albumId AND thumbnail_generated = 2`,
           { $albumId: albumId },
         );
-        saveDb();
       }
 
       // Generate all pending (loop until none left, since limit is 500 per batch)

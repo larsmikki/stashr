@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import Footer from '@/components/Footer';
+import SearchBar from '@/components/SearchBar';
 
 function LogoMark({ size = 28 }: { size?: number }) {
   return <img src="/favicon.svg" width={size} height={size} alt="Stashy" className="shrink-0" />;
@@ -64,6 +65,8 @@ export default function Layout() {
               Stashy
             </span>
           </Link>
+
+          <SearchBar />
 
           {/* Nav */}
           <nav className="flex items-center gap-0.5">

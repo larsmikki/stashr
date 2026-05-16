@@ -7,8 +7,10 @@ import NotFoundPage from '@/pages/NotFoundPage';
 import FavoritesPage from '@/pages/FavoritesPage';
 import LoginPage from '@/pages/LoginPage';
 import DonatePage from '@/pages/DonatePage';
+import SearchPage from '@/pages/SearchPage';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { Toaster } from 'sonner';
 
 function AppRoutes() {
   const { loading, passwordSet, authenticated } = useAuth();
@@ -27,6 +29,7 @@ function AppRoutes() {
         <Route path="/" element={<FrontPage />} />
         <Route path="/albums/:id" element={<AlbumPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/donate" element={<DonatePage />} />
         <Route path="*" element={<NotFoundPage />} />
@@ -40,6 +43,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <AppRoutes />
+        <Toaster position="bottom-right" theme="dark" richColors closeButton />
       </AuthProvider>
     </ThemeProvider>
   );

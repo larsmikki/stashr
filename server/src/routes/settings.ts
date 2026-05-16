@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getDb, saveDb } from '../db/connection.js';
+import { getDb } from '../db/connection.js';
 import { getErrorMessage } from '../utils/db.js';
 
 const router = Router();
@@ -14,7 +14,6 @@ function getSetting(key: string): string | null {
 function setSetting(key: string, value: string): void {
   const db = getDb();
   db.run('INSERT OR REPLACE INTO app_settings (key, value) VALUES ($key, $value)', { $key: key, $value: value });
-  saveDb();
 }
 
 router.get('/', (_req: Request, res: Response) => {

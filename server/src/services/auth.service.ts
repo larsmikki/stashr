@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
-import { getDb, saveDb } from '../db/connection.js';
+import { getDb } from '../db/connection.js';
 
 const SALT_ROUNDS = 10;
 const SESSION_DURATION_DAYS = 30;
@@ -21,7 +21,6 @@ export async function setPassword(plainPassword: string): Promise<void> {
      ON CONFLICT(key) DO UPDATE SET value = $hash`,
     { $hash: hash },
   );
-  saveDb();
 }
 
 export async function verifyPassword(plainPassword: string): Promise<boolean> {
@@ -38,7 +37,6 @@ export function removePassword(): void {
   const db = getDb();
   db.run(`DELETE FROM settings WHERE key = 'password_hash'`);
   db.run(`DELETE FROM sessions`);
-  saveDb();
 }
 
 export function createSession(): string {
@@ -51,7 +49,6 @@ export function createSession(): string {
     `INSERT INTO sessions (token, expires_at) VALUES ($token, $expires)`,
     { $token: token, $expires: expiresAt.toISOString() },
   );
-  saveDb();
   return token;
 }
 
@@ -67,5 +64,4 @@ export function validateSession(token: string): boolean {
 export function cleanExpiredSessions(): void {
   const db = getDb();
   db.run(`DELETE FROM sessions WHERE expires_at <= datetime('now')`);
-  saveDb();
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import http from 'http';
 import type { AddressInfo } from 'net';
-import type { Database } from 'sql.js';
+import type { CompatDb as Database } from '../src/db/connection.js';
 import { createTestDb } from './helpers/testDb.js';
 
 const dbRef = vi.hoisted(() => ({ current: null as Database | null }));

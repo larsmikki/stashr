@@ -31,16 +31,17 @@ export default function SortControls({ sort, order, onSortChange, onOrderChange 
     <div className="flex items-center gap-3">
       <div className="flex gap-1">
         <Btn active={sort === 'date'} onClick={() => onSortChange('date')} theme={theme}>Date</Btn>
+        <Btn active={sort === 'date_taken'} onClick={() => onSortChange('date_taken')} theme={theme}>Taken</Btn>
         <Btn active={sort === 'name'} onClick={() => onSortChange('name')} theme={theme}>Name</Btn>
         <Btn active={isRandom} onClick={() => onSortChange('random')} theme={theme}>Random</Btn>
       </div>
       {!isRandom && (
         <div className="flex gap-1">
           <Btn active={order === 'desc'} onClick={() => onOrderChange('desc')} theme={theme}>
-            {sort === 'date' ? 'Newest' : 'Z-A'}
+            {sort === 'date' || sort === 'date_taken' ? 'Newest' : 'Z-A'}
           </Btn>
           <Btn active={order === 'asc'} onClick={() => onOrderChange('asc')} theme={theme}>
-            {sort === 'date' ? 'Oldest' : 'A-Z'}
+            {sort === 'date' || sort === 'date_taken' ? 'Oldest' : 'A-Z'}
           </Btn>
         </div>
       )}

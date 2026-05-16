@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { getDb, saveDb } from '../db/connection.js';
+import { getDb } from '../db/connection.js';
 import { safePath } from '../utils/paths.js';
 import { config } from '../config.js';
 import type { Album } from '../types/index.js';
@@ -80,7 +80,6 @@ export function createAlbum(name: string, albumPath: string): Album {
     { $id: id },
   );
 
-  saveDb();
 
   return getAlbum(id)!;
 }
@@ -118,7 +117,6 @@ export function updateAlbum(id: number, name?: string, albumPath?: string): Albu
     { $name: newName, $path: newPath, $id: id },
   );
 
-  saveDb();
   return getAlbum(id)!;
 }
 
@@ -130,7 +128,6 @@ export function reorderAlbums(albumIds: number[]): void {
       { $order: i, $id: albumIds[i] },
     );
   }
-  saveDb();
 }
 
 export function deleteAlbum(id: number): void {
@@ -157,5 +154,4 @@ export function deleteAlbum(id: number): void {
   }
 
   db.run(`DELETE FROM albums WHERE id = $id`, { $id: id });
-  saveDb();
 }

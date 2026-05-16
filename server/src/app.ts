@@ -13,6 +13,8 @@ import filesystemRouter from './routes/filesystem.js';
 import authRouter from './routes/auth.js';
 import favoritesRouter from './routes/favorites.js';
 import settingsRouter from './routes/settings.js';
+import searchRouter from './routes/search.js';
+import bulkRouter from './routes/bulk.js';
 import { authMiddleware } from './middleware/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -47,6 +49,8 @@ export function createApp() {
   app.use('/api/filesystem', filesystemRouter);
   app.use('/api', favoritesRouter);
   app.use('/api/settings', settingsRouter);
+  app.use('/api', searchRouter);
+  app.use('/api', bulkRouter);
 
   // In production, serve the client build
   if (isProduction) {

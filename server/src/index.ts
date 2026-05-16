@@ -1,4 +1,4 @@
-import { initDb, getDb, saveDb } from './db/connection.js';
+import { initDb, getDb } from './db/connection.js';
 import { runMigrations } from './db/migrate.js';
 import { createApp } from './app.js';
 import { config } from './config.js';
@@ -20,7 +20,6 @@ async function main() {
     const failedCount = result.length ? (result[0].values[0][0] as number) : 0;
     if (failedCount > 0) {
       db.run(`UPDATE media_files SET thumbnail_generated = 0 WHERE file_type = 'video' AND thumbnail_generated = 2`);
-      saveDb();
       console.log(`Reset ${failedCount} failed video thumbnails for retry`);
     }
   }
