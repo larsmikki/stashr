@@ -39,7 +39,7 @@ router.get('/media/bulk-download', (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="stashy-${ids.length}-items.zip"`,
+      `attachment; filename="stashr-${ids.length}-items.zip"`,
     );
 
     const archive = archiver('zip', { zlib: { level: 0 } }); // store-only — media is already compressed

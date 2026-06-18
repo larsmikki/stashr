@@ -26,7 +26,7 @@ let baseUrl: string;
 const tmpDirs: string[] = [];
 
 function makeTmpDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'stashy-test-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'test-'));
   tmpDirs.push(dir);
   return dir;
 }

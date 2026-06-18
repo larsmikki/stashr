@@ -27,7 +27,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-bg">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-black tracking-tight gradient-text text-center mb-8">Stashy</h1>
+        <h1 className="text-2xl font-black tracking-tight gradient-text text-center mb-8">Stashr</h1>
         <form onSubmit={handleSubmit} className="p-6">
           <Surface className="p-6">
             {error && (

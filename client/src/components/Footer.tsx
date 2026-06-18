@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="border-t border-border bg-surface">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
         <span className="text-xs text-text2">
-          © {new Date().getFullYear()} Stashy
+          © {new Date().getFullYear()} Stashr
         </span>
         <div className="flex items-center gap-4">
           <Link

@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-export const STORAGE_KEY = 'stashy-theme';
+export const STORAGE_KEY = 'theme';
 
 export interface ThemeDefinition {
   name: string;

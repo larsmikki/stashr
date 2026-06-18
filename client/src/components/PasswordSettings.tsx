@@ -48,7 +48,7 @@ export default function PasswordSettings() {
       api.setToken(null);
       await refreshAuth();
       resetForm();
-      setSuccess('Password removed. Stashy is now open.');
+      setSuccess('Password removed. Stashr is now open.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove password');
     } finally {
@@ -73,7 +73,7 @@ export default function PasswordSettings() {
         <form onSubmit={handleSetPassword}>
           <p className="text-sm text-text2 flex items-center gap-2 mb-4">
             <span className="text-text2"><UnlockIcon /></span>
-            No password is set. Stashy is accessible to anyone on your network.
+            No password is set. Stashr is accessible to anyone on your network.
           </p>
           <div className="mb-4">
             <label htmlFor="new-password" className="block text-xs uppercase tracking-wider font-semibold text-text2 mb-1">Password</label>

@@ -1,6 +1,6 @@
 {
-  "name": "Stashy",
-  "short_name": "Stashy",
+  "name": "Stashr",
+  "short_name": "Stashr",
   "description": "Personal media library manager",
   "start_url": "/",
   "display": "standalone",

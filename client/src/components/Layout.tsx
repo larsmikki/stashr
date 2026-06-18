@@ -4,8 +4,14 @@ import { useTheme } from '@/contexts/ThemeContext';
 import Footer from '@/components/Footer';
 
 function LogoMark({ size = 28 }: { size?: number }) {
-  return <img src="/favicon.svg" width={size} height={size} alt="Stashy" className="shrink-0" />;
+  return <img src="/favicon.svg" width={size} height={size} alt="Stashr" className="shrink-0" />;
 }
+
+const DashboardIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+  </svg>
+);
 
 const FavoritesIcon = () => (
   <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -37,12 +43,13 @@ export default function Layout() {
   const { theme } = useTheme();
 
   const handleLock = () => {
-    if (window.confirm('Lock Stashy? You will need to enter the password again.')) {
+    if (window.confirm('Lock Stashr? You will need to enter the password again.')) {
       logout();
     }
   };
 
   const navItems = [
+    { to: '/', label: 'Dashboard', icon: <DashboardIcon />, end: true },
     { to: '/favorites', label: 'Favorites', icon: <FavoritesIcon /> },
     { to: '/settings', label: 'Settings', icon: <SettingsIcon /> },
   ];
@@ -61,7 +68,7 @@ export default function Layout() {
           <Link to="/" className="flex items-center gap-2.5" style={{ textDecoration: 'none' }}>
             <LogoMark size={28} />
             <span className="text-xl font-extrabold tracking-tight gradient-text select-none">
-              Stashy
+              Stashr
             </span>
           </Link>
 
@@ -71,6 +78,7 @@ export default function Layout() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                end={item.end}
                 className={({ isActive }) =>
                   `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${isActive ? 'bg-accent/10 text-accent' : 'text-text2'}`
                 }
@@ -95,7 +103,7 @@ export default function Layout() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4">
         <Outlet />
       </main>
 

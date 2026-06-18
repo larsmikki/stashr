@@ -28,7 +28,7 @@ async function main() {
 
   const app = createApp();
   app.listen(config.port, () => {
-    console.log(`Stashy server running on http://localhost:${config.port}`);
+    console.log(`Stashr server running on http://localhost:${config.port}`);
   });
 }
 

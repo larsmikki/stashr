@@ -60,7 +60,7 @@ export default function FrontPage() {
         <div className="text-center py-16" style={{ color: theme.text2 }}>Loading...</div>
       ) : albumsWithMedia.length === 0 ? (
         <div className="text-center py-16">
-          <h2 className="text-xl font-semibold mb-2" style={{ color: theme.text }}>Welcome to Stashy</h2>
+          <h2 className="text-xl font-semibold mb-2" style={{ color: theme.text }}>Welcome to Stashr</h2>
           <p className="mb-4" style={{ color: theme.text2 }}>
             No albums configured yet, or albums haven't been scanned.
           </p>
@@ -70,14 +70,6 @@ export default function FrontPage() {
         </div>
       ) : (
         <div>
-          <div className="mb-6">
-            <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: theme.text }}>
-              Your Collection
-            </h1>
-            <p className="text-sm mt-0.5" style={{ color: theme.text2 }}>
-              {albumsWithMedia.length} {albumsWithMedia.length === 1 ? 'album' : 'albums'} added
-            </p>
-          </div>
           {albumsWithMedia.map(album => (
             <AlbumRow
               key={album.id}

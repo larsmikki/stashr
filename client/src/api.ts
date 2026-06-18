@@ -1,5 +1,5 @@
 const BASE = '';
-const TOKEN_KEY = 'stashy-auth-token';
+const TOKEN_KEY = 'auth-token';
 
 function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -166,9 +166,10 @@ export interface AppSettings {
   favorites_on_home: boolean;
   favorites_sort_order: number;
   favorites_count: number;
+  gallery_use_originals: boolean;
 }
 export const getSettings = () => request<AppSettings>('/api/settings');
-export const updateSettings = (data: Partial<Pick<AppSettings, 'favorites_on_home' | 'favorites_sort_order'>>) =>
+export const updateSettings = (data: Partial<Pick<AppSettings, 'favorites_on_home' | 'favorites_sort_order' | 'gallery_use_originals'>>) =>
   request<{ status: string }>('/api/settings', { method: 'PUT', body: JSON.stringify(data) });
 
 // Home

@@ -1,6 +1,9 @@
-import { forwardRef, useRef } from 'react';
+import { forwardRef, useRef, useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { VirtuosoGrid } from 'react-virtuoso';
 import ThumbnailCard from '@/components/ThumbnailCard';
+import { getSettings } from '@/api';
+import { queryKeys } from '@/queryKeys';
 import type { MediaFile } from '@/types';
 
 interface Props {
@@ -33,8 +36,22 @@ const ItemContainer = (props: React.HTMLAttributes<HTMLDivElement>) => (
   <div {...props} style={{ ...props.style, display: 'flex' }} />
 );
 
+const ORIGINALS_KEY = 'gallery-originals';
+
 export default function MediaGrid({ items, onMediaClick, onFavoriteToggle, emptyMessage, selection, onEndReached, loadingMore }: Props) {
   const anchorRef = useRef<number | null>(null);
+  const { data: settings } = useQuery({ queryKey: queryKeys.settings, queryFn: getSettings });
+  const [useOriginals, setUseOriginals] = useState<boolean>(() =>
+    localStorage.getItem(ORIGINALS_KEY) === 'true'
+  );
+
+  useEffect(() => {
+    if (settings?.gallery_use_originals !== undefined) {
+      const val = settings.gallery_use_originals;
+      setUseOriginals(val);
+      localStorage.setItem(ORIGINALS_KEY, val ? 'true' : 'false');
+    }
+  }, [settings?.gallery_use_originals]);
 
   if (!items.length) {
     return (
@@ -76,6 +93,7 @@ export default function MediaGrid({ items, onMediaClick, onFavoriteToggle, empty
               selectable={!!selection}
               selected={selection?.ids.has(media.id)}
               onToggleSelect={handleToggleSelect}
+              useOriginals={useOriginals}
             />
           );
         }}

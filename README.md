@@ -1,13 +1,13 @@
-# Stashy
+# Stashr
 
 A self-hosted personal media gallery for browsing images and videos over LAN.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-larsmikki%2Fstashy-blue?logo=docker)](https://hub.docker.com/r/larsmikki/stashy)
-[![ghcr.io](https://img.shields.io/badge/ghcr.io-larsmikki%2Fstashy-blue?logo=github)](https://github.com/larsmikki/stashy/pkgs/container/stashy)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-larsmikki%2Fstashr-blue?logo=docker)](https://hub.docker.com/r/larsmikki/stashr)
+[![ghcr.io](https://img.shields.io/badge/ghcr.io-larsmikki%2Fstashr-blue?logo=github)](https://github.com/larsmikki/stashr/pkgs/container/stashr)
 [![Node 20](https://img.shields.io/badge/Node-20-brightgreen?logo=node.js)](https://nodejs.org/)
 
-![Stashy screenshot](screenshot.png)
+![Stashr screenshot](screenshot.png)
 
 ## Features
 
@@ -36,9 +36,9 @@ Works on Synology, Unraid, TrueNAS, QNAP, Proxmox, or a plain Docker host. FFmpe
 
 ```yaml
 services:
-  stashy:
-    image: larsmikki/stashy:latest
-    container_name: stashy
+  stashr:
+    image: larsmikki/stashr:latest
+    container_name: stashr
     ports:
       - "3010:3010"
     volumes:
@@ -65,14 +65,14 @@ volumes:
 
 Then `docker compose up -d`. Open **http://localhost:3010**, go to **Settings → Add album**, and pick a folder (e.g. `/media/photos`).
 
-To update: `docker compose down && docker pull larsmikki/stashy:latest && docker compose up -d`.
+To update: `docker compose down && docker pull larsmikki/stashr:latest && docker compose up -d`.
 
 ### 2. Local install on Windows
 
 ```powershell
 scoop install nodejs-lts git ffmpeg
-git clone https://github.com/larsmikki/stashy.git
-cd stashy
+git clone https://github.com/larsmikki/stashr.git
+cd stashr
 npm install
 npm run dev
 ```
@@ -88,8 +88,8 @@ npm start
 
 ```bash
 brew install node git ffmpeg
-git clone https://github.com/larsmikki/stashy.git
-cd stashy
+git clone https://github.com/larsmikki/stashr.git
+cd stashr
 npm install
 npm run dev
 ```
@@ -104,8 +104,8 @@ Debian/Ubuntu:
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs git ffmpeg
 
-git clone https://github.com/larsmikki/stashy.git
-cd stashy
+git clone https://github.com/larsmikki/stashr.git
+cd stashr
 npm install
 npm run dev
 ```
@@ -136,3 +136,7 @@ For a production build: `npm run build && npm start`.
 - HLS segment names validated against an allowlist pattern
 - JSON body limited to 1 MB
 - Session tokens expire automatically
+
+## Upgrading from Stashy
+
+Renaming the app to Stashr neutralizes a few localStorage keys (`stashy-auth-token`, `stashy-theme`, `stashy-gallery-originals`). Existing sessions will be logged out and theme preference will reset to Default on first load after upgrade. Album data (SQLite database) and thumbnails are unaffected.

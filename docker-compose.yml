@@ -1,7 +1,7 @@
 services:
-  stashy:
-    image: larsmikki/stashy:latest
-    container_name: stashy
+  stashr:
+    image: larsmikki/stashr:latest
+    container_name: stashr
     ports:
       - "3010:3010"
     volumes:

@@ -119,7 +119,7 @@ export default function SettingsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `stashy-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `stashr-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -217,6 +217,16 @@ export default function SettingsPage() {
     try {
       setError(null);
       await updateSettingsMutation.mutateAsync({ favorites_on_home: enabled });
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to update settings'));
+    }
+  };
+
+  const handleToggleUseOriginals = async (enabled: boolean) => {
+    localStorage.setItem('gallery-originals', enabled ? 'true' : 'false');
+    try {
+      setError(null);
+      await updateSettingsMutation.mutateAsync({ gallery_use_originals: enabled });
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to update settings'));
     }
@@ -326,9 +336,40 @@ export default function SettingsPage() {
         <Surface className="p-6 mb-5">
           <h2 className="text-base font-bold mb-1 text-text">Themes</h2>
           <p className="text-xs text-text2 mb-5">
-            Choose how Stashy looks to you.
+            Choose how Stashr looks to you.
           </p>
           <ThemePicker />
+        </Surface>
+
+        {/* Display Section */}
+        <Surface className="p-6 mb-5">
+          <h2 className="text-base font-bold mb-1 text-text">Display</h2>
+          <p className="text-xs text-text2 mb-5">
+            Control how media is shown in the gallery.
+          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-text">Show originals in gallery</p>
+              <p className="text-xs text-text2 mt-0.5">Serve original files instead of thumbnails. Animated GIFs and WebP play in the grid, but loading may be slower.</p>
+            </div>
+            <label className="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full border transition-colors ml-6 flex-shrink-0"
+              style={{
+                background: settings?.gallery_use_originals ? theme.accent : theme.surface2,
+                borderColor: settings?.gallery_use_originals ? theme.accent : theme.border,
+              }}
+            >
+              <input
+                className="sr-only"
+                type="checkbox"
+                checked={settings?.gallery_use_originals ?? false}
+                onChange={e => handleToggleUseOriginals(e.target.checked)}
+              />
+              <span
+                className="absolute top-0.5 h-[18px] w-[18px] rounded-full bg-white shadow-sm transition-[left]"
+                style={{ left: settings?.gallery_use_originals ? 20 : 2 }}
+              />
+            </label>
+          </div>
         </Surface>
 
         {/* Albums Section */}
@@ -490,14 +531,14 @@ export default function SettingsPage() {
               </svg>
               Export Settings
             </Button>
-            <Button variant="secondary" onClick={() => document.getElementById('stashy-import-input')?.click()}>
+            <Button variant="secondary" onClick={() => document.getElementById('import-input')?.click()}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
               </svg>
               Import Settings
             </Button>
             <input
-              id="stashy-import-input"
+              id="import-input"
               type="file"
               accept=".json"
               className="hidden"
@@ -510,7 +551,7 @@ export default function SettingsPage() {
         <Surface className="p-6">
           <h2 className="text-base font-bold mb-1 text-text">Password protection</h2>
           <p className="text-xs text-text2 mb-5">
-            Optionally lock Stashy with a password.
+            Optionally lock Stashr with a password.
           </p>
           <PasswordSettings />
         </Surface>
