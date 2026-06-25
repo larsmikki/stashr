@@ -14,6 +14,7 @@ import authRouter from './routes/auth.js';
 import favoritesRouter from './routes/favorites.js';
 import settingsRouter from './routes/settings.js';
 import bulkRouter from './routes/bulk.js';
+import wallRouter from './routes/wall.js';
 import { authMiddleware } from './middleware/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -49,6 +50,7 @@ export function createApp() {
   app.use('/api', favoritesRouter);
   app.use('/api/settings', settingsRouter);
   app.use('/api', bulkRouter);
+  app.use('/api/wall', wallRouter);
 
   // In production, serve the client build
   if (isProduction) {

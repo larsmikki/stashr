@@ -10,4 +10,5 @@ export const queryKeys = {
   settings: ['settings'] as const,
   browsePath: (path?: string) => ['browse-path', path ?? ''] as const,
   mediaMetadata: (id: number) => ['media-metadata', id] as const,
+  wall: ['wall'] as const,
 }

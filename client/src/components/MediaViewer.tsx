@@ -72,7 +72,7 @@ export default function MediaViewer({ media, items, currentIndex, onClose, onNav
   const hasImages = items.some(m => m.file_type === 'image');
 
   const handleBackdropClick = useCallback((e: MouseEvent) => {
-    if (e.target === e.currentTarget) onClose();
+    if (!(e.target as HTMLElement).closest('button, img, video')) onClose();
   }, [onClose]);
 
   return (
@@ -161,7 +161,6 @@ export default function MediaViewer({ media, items, currentIndex, onClose, onNav
       <div
         ref={swipeRef}
         className="flex items-center justify-center w-full h-full pt-14 pb-8 px-2 sm:p-12"
-        onClick={handleBackdropClick}
       >
         {media.file_type === 'image' ? (
           <TransformWrapper

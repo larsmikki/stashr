@@ -5,6 +5,7 @@ import AlbumPage from '@/pages/AlbumPage';
 import SettingsPage from '@/pages/SettingsPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import FavoritesPage from '@/pages/FavoritesPage';
+import WallPage from '@/pages/WallPage';
 import LoginPage from '@/pages/LoginPage';
 import DonatePage from '@/pages/DonatePage';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,6 +30,7 @@ function AppRoutes() {
         <Route path="/" element={<FrontPage />} />
         <Route path="/albums/:id" element={<AlbumPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path="/wall" element={<WallPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/donate" element={<DonatePage />} />
         <Route path="*" element={<NotFoundPage />} />

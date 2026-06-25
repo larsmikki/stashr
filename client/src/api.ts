@@ -175,6 +175,9 @@ export const updateSettings = (data: Partial<Pick<AppSettings, 'favorites_on_hom
 // Home
 export const getHome = () => request<{ albums: HomeAlbum[] }>('/api/home');
 
+// Wall
+export const getWall = () => request<{ items: MediaFile[] }>('/api/wall');
+
 // Filesystem
 export const browsePath = (path?: string) => {
   const qs = path ? `?path=${encodeURIComponent(path)}` : '';

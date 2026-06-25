@@ -8,7 +8,7 @@ services:
       - stash_data:/app/data
       - stash_cache:/app/cache
       # Replace with the path to your media folder: :ro=Read-only
-      - /path/to/your/media:/media:ro
+      - /volume2/Private:/media:ro
     environment:
       - PORT=3010
     healthcheck:
@@ -16,7 +16,7 @@ services:
       interval: 5m
       timeout: 10s
       retries: 3
-    restart: unless-stopped
+    restart: always
 
 volumes:
   stash_data:

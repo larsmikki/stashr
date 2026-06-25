@@ -62,6 +62,7 @@ const SCHEMA = `
 
   INSERT OR IGNORE INTO app_settings (key, value) VALUES ('favorites_on_home', '0');
   INSERT OR IGNORE INTO app_settings (key, value) VALUES ('favorites_sort_order', '9999');
+  INSERT OR IGNORE INTO app_settings (key, value) VALUES ('gallery_use_originals', '0');
 `;
 
 function stripPrefix(params: Record<string, unknown>): Record<string, unknown> {

@@ -14,8 +14,8 @@ export default function AlbumRow({ album, onMediaClick, onFavoriteToggle }: Prop
   const href = album.is_favorites ? '/favorites' : `/albums/${album.id}`;
 
   return (
-    <div className="mb-8">
-      <div className="flex items-center justify-between mb-3">
+    <div className="mb-5">
+      <div className="flex items-center justify-between mb-2">
         <Link
           to={href}
           className="text-lg font-semibold flex items-center gap-2 transition-opacity hover:opacity-80 text-text"

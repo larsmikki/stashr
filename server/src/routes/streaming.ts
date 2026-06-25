@@ -69,9 +69,10 @@ router.get('/:mediaId/full', (req: Request, res: Response) => {
     if (!media) return res.status(404).json({ error: 'Media not found' });
 
     const albumPath = getAlbumPath(media.album_id);
-    if (!albumPath) return res.status(404).json({ error: 'Album not found' });
-    try { ensureWithin(media.file_path, albumPath); } catch {
-      return res.status(403).json({ error: 'Access denied' });
+    if (albumPath) {
+      try { ensureWithin(media.file_path, albumPath); } catch {
+        return res.status(403).json({ error: 'Access denied' });
+      }
     }
 
     if (!fs.existsSync(media.file_path)) {
